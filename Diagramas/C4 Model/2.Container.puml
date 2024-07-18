@@ -1,0 +1,88 @@
+@startuml C4_Context
+
+!include <C4/C4_Container>
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v18.0/dist
+
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/AWSC4Integration.puml
+
+!include DEVICONS/angular.puml
+!include DEVICONS/postgresql.puml
+!include FONTAWESOME/server.puml
+
+
+UpdateBoundaryStyle($bgColor=$AWS_BG_COLOR, $fontColor=$AWS_FG_COLOR, $borderColor=$AWS_COLOR_GRAY)
+
+' Experimental tag based Element formatting
+!procedure $AWSC4AddElementTag($category, $icon)
+!$tagborder = $AWSColor($category)
+!if %variable_exists("$AWS_DARK") && ($AWS_DARK == true) && ($category == "General")
+!$tagimgext = '_Dark.png'
+!$tagborder = $AWS_FG_COLOR
+!else
+!$tagimgext = '.png'
+!endif
+!$tagimg = 'img:' + AWSPuml + '/' + $category + '/' + $icon + $tagimgext
+AddElementTag("$icon", $fontColor=$AWS_FG_COLOR, $borderColor=$tagborder, $bgColor=$AWS_BG_COLOR, $sprite=$tagimg{scale=0.7}, $legendSprite=$tagimg{scale=0.25})
+!endprocedure
+
+skinparam wrapWidth 300
+'LAYOUT_LANDSCAPE()
+
+title
+<b>Health&Med</b> - <i>Startup de Telemedicina</i>
+C4 Model: Container
+end title
+
+'atores
+Person(admin, "Administrador", "Usuário Administrador")
+Person(doctor, "Médico", "Usuário Médico")
+Person(patient, "Paciente", "Usuário Paciente")
+    
+System_Boundary(telemed, "Tel&Med", "Telemedicina") {
+    Container(spa, "Single-Page App", "JavaScript, Angular", "Fornece toda a funcionalidade de teleconsulta pela Internet para os clientes por meio do navegador web.","angular")
+    Container(backend_api, "API Application", "Java, Spring, Docker Container", "Fornece toda a funcionalidade de teleconsulta via API", "server")
+    'ContainerDb(database, "Database", "SQL Database", "Armazenamento de cadastros médicos e pacientes, horários, agendas, consultas, protuários, etc...", "postgresql")
+}
+
+Rel(admin, spa, "Usa", "HTTPS")
+Rel(doctor, spa, "Usa", "HTTPS")
+Rel(patient, spa, "Usa", "HTTPS")
+
+
+$AWSC4AddElementTag("Storage", "SimpleStorageServiceBucket")
+$AWSC4AddElementTag("Compute", "LambdaLambdaFunction")
+$AWSC4AddElementTag("Database", "AuroraPostgreSQLInstance")
+$AWSC4AddElementTag("SecurityIdentityCompliance", "Cognito")
+$AWSC4AddElementTag("ApplicationIntegration", "APIGateway")
+
+Enterprise_Boundary(aws, "AWS", "Amazon Web Services") {
+    Boundary(authentication, "Autenticação", "Serviços usados na Autenticação") {
+        System_Ext(apiGateway, "AWS API Gateway", "Ponto de entrada para requisições da API", $tags="APIGateway")
+        System_Ext(cognito, "AWS Cognito", "Gerenciamento de autenticação e autorização", $tags="Cognito")
+        System_Ext(lambda, "AWS Lambda", "Processa requisições da API e verifica o perfil do usuário", $tags="LambdaLambdaFunction")
+    }
+
+    Boundary(storage, "Armazenamento", "Serviços usados no Armazenamento") {
+        System_Ext(s3, "AWS S3", "Armazenamento de arquivos de prontuários, imagens, etc...", $tags="SimpleStorageServiceBucket")
+        ContainerDb_Ext(database, "Database Postgresqls","AWS RDS", "Armazenamento de cadastros médicos e pacientes, horários, agendas, consultas, protuários, etc...", $tags="AuroraPostgreSQLInstance")
+    }
+}
+
+Rel(backend_api, database, "Lê e grava em", "sync, JDBC")
+Rel(backend_api, s3, "Lê e grava arquivos em", "sync, S3/SDK")
+
+
+
+Rel(apiGateway, lambda, "Autentica e autoriza requisições")
+Rel_Back(apiGateway, lambda, "Retorna tokens de autenticação e dados do usuário")
+Rel(lambda, cognito, " Autentica usuários")
+Rel_Back(lambda, cognito, " Retorna tokens de autenticação")
+Rel(spa, apiGateway, "Usa", "sync/async, JSON/HTTPS")
+Rel(apiGateway, backend_api, "Encaminha", "sync/async, JSON/HTTPS")
+
+SHOW_LEGEND()
+
+@enduml
