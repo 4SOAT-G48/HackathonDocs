@@ -1,7 +1,5 @@
 @startuml C4_Context
 
-'!include Commons/Skinparam.puml
-
 '!include <C4/C4_Container>
 !include <C4/C4_Context>
 
@@ -25,7 +23,7 @@ Enterprise_Boundary(healthmed, "Health&Med", "Startup de Telemedicina") {
     
     System_Boundary(telemed, "Tel&Med", "Telemedicina") {
         System(frontend, "Frontend", "Interface do Usuário")
-        System(backend, "Backend", "Lógica de Negócio")
+        System(backend_api, "Backend", "Lógica de Negócio")
     }
 }
 
@@ -65,15 +63,23 @@ Enterprise_Boundary(aws, "AWS", "Amazon Web Services") {
         System_Ext(cognito, "AWS Cognito", "Gerenciamento de autenticação e autorização")
         System_Ext(lambda, "AWS Lambda", "Processa requisições da API e verifica o perfil do usuário")
     }
+
+    Boundary(storage, "Armazenamento", "Serviços usados no Armazenamento") {
+        System_Ext(s3, "AWS S3", "Armazenamento de arquivos de prontuários, imagens, etc...")
+        System_Ext(database, "Database Postgresqls","AWS RDS", "Armazenamento de cadastros médicos e pacientes, horários, agendas, consultas, protuários, etc...")
+    }
 }
 
+Rel(backend_api, database, "Lê e grava em", "sync, JDBC")
+Rel(backend_api, s3, "Lê e grava arquivos em", "sync, S3/SDK")
+
 'autenticação relacionamentos
-Rel(apiGateway, cognito, "Autentica e autoriza requisições")
-Rel_Back(apiGateway, cognito, "Recebe tokens de autenticação")
-Rel(apiGateway, lambda, "Encaminha requisições autenticadas")
-Rel_Back(apiGateway, lambda, "Retorna respostas")
-BiRel(frontend, apiGateway, "Todas as requisições primeiro vão passar pelo API Gateway")
-BiRel(apiGateway, backend, "Encaminha requisições para o Backend")
+Rel(apiGateway, lambda, "Autentica e autoriza requisições")
+Rel_Back(apiGateway, lambda, "Retorna tokens de autenticação e dados do usuário")
+Rel(lambda, cognito, " Autentica usuários")
+Rel_Back(lambda, cognito, " Retorna tokens de autenticação")
+Rel(frontend, apiGateway, "Todas as requisições primeiro vão passar pelo API Gateway")
+Rel(apiGateway, backend_api, "Encaminha requisições para o Backend")
 
 
 
