@@ -1,0 +1,120 @@
+@startuml C4_Context
+
+!include <C4/C4_Component>
+
+skinparam wrapWidth 300
+'LAYOUT_LANDSCAPE()
+
+AddRelTag("linksOutPuts", $textColor=blue, $lineColor="blue",$legendText="Chamadas externas ao sistema")
+AddRelTag("linksApiToControllers", $textColor=DeepPink, $lineColor="DeepPink",$legendText="Redirecionamento do API Gateway para Controllers")
+AddRelTag("linksRelInternDashed", $lineStyle=DashedLine(), $legendText="Relacionamento interno ao sistema e entre modulos")
+
+title
+<b>Health&Med</b> - <i>Startup de Telemedicina</i>
+C4 Model: Componente - API Application
+end title
+
+    
+System_Boundary(telemed, "Tel&Med", "Telemedicina") {
+    Container(spa, "Single-Page App", "JavaScript, Angular", "Fornece toda a funcionalidade de teleconsulta pela Internet para os clientes por meio do navegador web.")
+    
+    Container_Boundary(backend_api, "API Application") {
+
+        Component(moduloCadastro,"Modulo Cadastros", $baseShape="package") {
+            Component(cadastrosController, "Cadastros Controller", "Cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades. Cadastro de pacientes.")
+            Component(cadastrosService, "Cadastros Service", "Serviço de cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades")
+            Component(cadastrosModel, "Cadastros Model", "Modelo de cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades. Cadastro de pacientes.")
+            Component(cadastrosRepository, "Cadastros Repository", "Repositório de cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades. Cadastro de pacientes.")
+            Component(cadastrosEntity, "Cadastros Entity", "Entidade de cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades. Cadastro de pacientes.")
+            Rel(cadastrosController, cadastrosService, "Chama")
+            Rel(cadastrosService, cadastrosModel, "Usa")
+            Rel(cadastrosService, cadastrosRepository, "Usa")
+            Rel(cadastrosRepository, cadastrosEntity, "Usa")
+        }
+
+        Component(moduloConsulta,"Modulo Consultas", $baseShape="package") {
+            Component(consultasController, "Consultas Controller", "Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
+            Component(consultasService, "Consultas Service", "Serviço de Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
+            Component(consultasModel, "Consultas Model", "Modelo de Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
+            Component(consultasRepository, "Consultas Repository", "Repositório de Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
+            Component(consultasEntity, "Consultas Entity", "Entidade de Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
+            Rel(consultasController, consultasService, "Chama")
+            Rel(consultasService, consultasModel, "Usa")
+            Rel(consultasService, consultasRepository, "Usa")
+            Rel(consultasRepository, consultasEntity, "Usa")
+            Rel(consultasEntity, cadastrosEntity, "Se relaciona com", $tags="linksRelInternDashed")
+        }
+
+        Component(moduloTeleconsulta,"Modulo Teleconsulta", $baseShape="package") {
+            Component(teleconsultaController, "Teleconsulta Controller", "Inicia e encerra a teleconsulta. Envia e recebe mensagens de texto e áudio.")
+            Component(teleconsultaService, "Teleconsulta Service", "Serviço de Inicia e encerra a teleconsulta. Envia e recebe mensagens de texto e áudio.")
+            Component(teleconsultaModel, "Teleconsulta Model", "Modelo de Inicia e encerra a teleconsulta. Envia e recebe mensagens de texto e áudio.")
+            Component(teleconsultaRepository, "Teleconsulta Repository", "Repositório de Inicia e encerra a teleconsulta. Envia e recebe mensagens de texto e áudio.")
+            Component(teleconsultaEntity, "Teleconsulta Entity", "Entidade de Inicia e encerra a teleconsulta. Envia e recebe mensagens de texto e áudio.")
+            Rel(teleconsultaController, teleconsultaService, "Chama")
+            Rel(teleconsultaService, teleconsultaModel, "Usa")
+            Rel(teleconsultaService, teleconsultaRepository, "Usa")
+            Rel(teleconsultaRepository, teleconsultaEntity, "Usa")
+            Rel(teleconsultaEntity, cadastrosEntity, "Se relaciona com", $tags="linksRelInternDashed")
+        }
+
+        Component(moduloProntuarios,"Modulo Prontuários", $baseShape="package") {
+            Component(prontuariosController, "Prontuários Controller", "Cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
+            Component(prontuariosService, "Prontuários Service", "Serviço de cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
+            Component(prontuariosModel, "Prontuários Model", "Modelo de cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
+            Component(prontuariosRepository, "Prontuários Repository", "Repositório de cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
+            Component(prontuariosEntity, "Prontuários Entity", "Entidade de cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
+            Component(prontuariosStorage, "Prontuários Storage", "Armazenamento de arquivos de prontuários, imagens, etc...")
+            Rel(prontuariosController, prontuariosService, "Chama")
+            Rel(prontuariosService, prontuariosModel, "Usa")
+            Rel(prontuariosService, prontuariosRepository, "Usa")
+            Rel(prontuariosRepository, prontuariosEntity, "Usa")
+            Rel(prontuariosService, prontuariosStorage, "Usa")
+            Rel(prontuariosEntity, cadastrosEntity, "Se relaciona com", $tags="linksRelInternDashed")
+            Rel(prontuariosEntity, teleconsultaEntity, "Se relaciona com", $tags="linksRelInternDashed")
+        }
+
+    }
+    
+}
+
+
+Enterprise_Boundary(aws, "AWS", "Amazon Web Services") {
+    Boundary(authentication, "Autenticação", "Serviços usados na Autenticação") {
+        System_Ext(apiGateway, "AWS API Gateway", "Ponto de entrada para requisições da API")
+        System_Ext(cognito, "AWS Cognito", "Gerenciamento de autenticação e autorização")
+        System_Ext(lambda, "AWS Lambda", "Processa requisições da API e verifica o perfil do usuário")
+
+        Rel(apiGateway, lambda, "Autentica e autoriza requisições")
+        Rel_Back(apiGateway, lambda, "Retorna tokens de autenticação e dados do usuário")
+        Rel(lambda, cognito, " Autentica usuários")
+        Rel_Back(lambda, cognito, " Retorna tokens de autenticação")
+    }
+
+    Boundary(storage, "Armazenamento", "Serviços usados no Armazenamento") {
+        System_Ext(s3, "AWS S3", "Armazenamento de arquivos de prontuários, imagens, etc...")
+        ContainerDb_Ext(database, "Database Postgresqls","AWS RDS", "Armazenamento de cadastros médicos e pacientes, horários, agendas, consultas, protuários, etc...")
+    }
+}
+
+Rel(spa, apiGateway, "Usa", "sync/async, JSON/HTTPS")
+
+Rel(prontuariosStorage, s3, "Lê e grava arquivos em", "sync, S3/SDK", $tags="linksOutPuts")
+
+
+Rel(cadastrosRepository, database, "Lê e grava em", "sync, JDBC", $tags="linksOutPuts")
+Rel(consultasRepository, database, "Lê e grava em", "sync, JDBC", $tags="linksOutPuts")
+Rel(teleconsultaRepository, database, "Lê e grava em", "sync, JDBC", $tags="linksOutPuts")
+
+Rel(apiGateway, cadastrosController, "Encaminha", "sync/async, JSON/HTTPS", $tags="linksApiToControllers")
+Rel(apiGateway, consultasController, "Encaminha", "sync/async, JSON/HTTPS", $tags="linksApiToControllers")
+Rel(apiGateway, teleconsultaController, "Encaminha", "sync/async, JSON/HTTPS", $tags="linksApiToControllers")
+
+
+
+
+
+
+SHOW_LEGEND()
+
+@enduml
