@@ -20,7 +20,7 @@ System_Boundary(telemed, "Tel&Med", "Telemedicina") {
     
     Container_Boundary(backend_api, "API Application") {
 
-        Component(moduloCadastro,"Modulo Cadastros", $baseShape="package") {
+        Component(moduloCadastro,"Modulo Cadastro", $baseShape="package") {
             Component(cadastrosController, "Cadastros Controller", "Cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades. Cadastro de pacientes.")
             Component(cadastrosService, "Cadastros Service", "Serviço de cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades")
             Component(cadastrosModel, "Cadastros Model", "Modelo de cadastro de médicos, endereço e especialidades. Buscas por médicos e especialidades. Cadastro de pacientes.")
@@ -32,7 +32,7 @@ System_Boundary(telemed, "Tel&Med", "Telemedicina") {
             Rel(cadastrosRepository, cadastrosEntity, "Usa")
         }
 
-        Component(moduloConsulta,"Modulo Consultas", $baseShape="package") {
+        Component(moduloConsulta,"Modulo Consulta", $baseShape="package") {
             Component(consultasController, "Consultas Controller", "Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
             Component(consultasService, "Consultas Service", "Serviço de Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
             Component(consultasModel, "Consultas Model", "Modelo de Cadastro/Edição de Horários Disponíveis. Agendamento de Consultas. Aceite ou Recusa de Consultas Médicas.")
@@ -58,7 +58,7 @@ System_Boundary(telemed, "Tel&Med", "Telemedicina") {
             Rel(teleconsultaEntity, cadastrosEntity, "Se relaciona com", $tags="linksRelInternDashed")
         }
 
-        Component(moduloProntuarios,"Modulo Prontuários", $baseShape="package") {
+        Component(moduloProntuarios,"Modulo Prontuário", $baseShape="package") {
             Component(prontuariosController, "Prontuários Controller", "Cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
             Component(prontuariosService, "Prontuários Service", "Serviço de cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
             Component(prontuariosModel, "Prontuários Model", "Modelo de cadastro de prontuários. Busca de prontuários. Gestão de Compartilhamento.")
