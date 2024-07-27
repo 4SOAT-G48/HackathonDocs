@@ -1,0 +1,58 @@
+@startuml
+!include ../Commons/Skinparam.puml
+
+title Sistema de Telemedicina - Casos de Uso
+
+actor "Médico" as medico
+actor "Paciente" as paciente
+actor "Sistema" as sistema
+
+rectangle "Autenticação" {
+    usecase (Login) as login
+}
+medico --- login
+login ---- paciente
+
+rectangle "Cadastro/Edição de Horários Disponíveis" {
+    usecase (Cadastro de Horários) as cadastro
+    usecase (Edição de Horários) as edicao
+}
+medico - cadastro
+medico - edicao
+
+rectangle "Aceite ou Recusa de Consultas Médicas" {
+    usecase (Aceite de Consultas) as aceite
+    usecase (Recusa de Consultas) as recusa
+}
+aceite -- medico
+recusa -- medico
+
+rectangle "Busca por Médicos" {
+    usecase (Filtrar Médicos) as filtrar
+}
+paciente --- filtrar
+
+rectangle "Agendamento de Consultas" {
+    usecase (Visualizar Agenda) as visualizar
+    usecase (Agendar Consulta) as agendar
+    usecase (Cancelar Consulta) as cancelar
+}
+visualizar -- paciente
+agendar -- paciente
+cancelar -- paciente
+
+rectangle "Teleconsulta" {
+    usecase (Criar Link) as criar
+}
+criar - sistema
+agendar .> criar : <<include>>
+
+rectangle "Prontuário Eletrônico" {
+    usecase (Acesso e Upload) as acesso
+    usecase (Gestão de Compartilhamento) as compartilhamento
+}
+paciente -- acesso
+paciente -- compartilhamento
+
+
+@enduml
