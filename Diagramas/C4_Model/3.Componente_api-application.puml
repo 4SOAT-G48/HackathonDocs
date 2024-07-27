@@ -3,7 +3,7 @@
 !include <C4/C4_Component>
 
 skinparam wrapWidth 300
-'LAYOUT_LANDSCAPE()
+LAYOUT_LANDSCAPE()
 
 AddRelTag("linksOutPuts", $textColor=blue, $lineColor="blue",$legendText="Chamadas externas ao sistema")
 AddRelTag("linksApiToControllers", $textColor=DeepPink, $lineColor="DeepPink",$legendText="Redirecionamento do API Gateway para Controllers")
